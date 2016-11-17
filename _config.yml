@@ -16,3 +16,6 @@ defaults:
       type: "pages"
     values:
       layout: "documentation"
+
+gems: ['kramdown']
+exclude: ['config.ru', 'Gemfile', 'Gemfile.lock', 'Procfile', 'Rakefile']

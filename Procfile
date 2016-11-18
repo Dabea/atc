@@ -1,1 +1,1 @@
-web: jekyll serve -P $PORT
+web: npm install && gulp build && npm run start

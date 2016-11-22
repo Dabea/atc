@@ -103,26 +103,53 @@ export default class AircraftFlightManagementSystem {
 
     /** ***************** FMS FLIGHTPLAN CONTROL FUNCTIONS *******************/
 
+    // TODO: need a better name for this method
+    /**
+     *
+     *
+     * @for AircraftFlightManagementSystem
+     * @method _copyPreviousWaypointSettingsToCurrent
+     * @private
+     */
+    _copyPreviousWaypointSettingsToCurrent() {
+        const previousWaypoint = this.currentWaypoint;
+        const currentWaypoint = this.currentWaypoint;
+
+        if (previousWaypoint && !currentWaypoint.altitude) {
+            currentWaypoint.altitude = previousWaypoint.altitude;
+        }
+
+        if (previousWaypoint && !currentWaypoint.speed) {
+            currentWaypoint.speed = previousWaypoint.speed;
+        }
+
+        if (!currentWaypoint.heading && currentWaypoint.navmode === WAYPOINT_NAV_MODE.HEADING) {
+            currentWaypoint.heading = previousWaypoint.heading;
+        }
+    }
+
     /**
      * Insert a Leg at the front of the flightplan
      */
     prependLeg(data) {
-        const prev = this.currentWaypoint;
         const legToAdd = new Leg(data, this);
 
         this.legs.unshift(legToAdd);
+
         this.update_fp_route();
+        this._copyPreviousWaypointSettingsToCurrent();
 
         // TODO: these if blocks a repeated elsewhere, perhaps currentWaypoint can handle this logic?
         // Verify altitude & speed not null
-        const curr = this.currentWaypoint;
-        if (prev && !curr.altitude) {
-            curr.altitude = prev.altitude;
-        }
-
-        if (prev && !curr.speed) {
-            curr.speed = prev.speed;
-        }
+        // const prev = this.currentWaypoint;
+        // const curr = this.currentWaypoint;
+        // if (prev && !curr.altitude) {
+        //     curr.altitude = prev.altitude;
+        // }
+        //
+        // if (prev && !curr.speed) {
+        //     curr.speed = prev.speed;
+        // }
     }
 
     /**
@@ -130,22 +157,24 @@ export default class AircraftFlightManagementSystem {
      */
     insertWaypointHere(data) {
         const airport = window.airportController.airport_get();
-        const prev = this.currentWaypoint;
 
         // TODO: split this up into smaller chunks
         this.currentLeg.waypoints.splice(this.current[WAYPOINT_WITHIN_LEG], 0, new Waypoint(data, airport));
+
         this.update_fp_route();
+        this._copyPreviousWaypointSettingsToCurrent();
 
         // TODO: these if blocks a repeated elsewhere, perhaps currentWaypoint can handle this logic?
         // Verify altitude & speed not null
-        const curr = this.currentWaypoint;
-        if (prev && !curr.altitude) {
-            curr.altitude = prev.altitude;
-        }
-
-        if (prev && !curr.speed) {
-            curr.speed = prev.speed;
-        }
+        // const prev = this.currentWaypoint;
+        // const curr = this.currentWaypoint;
+        // if (prev && !curr.altitude) {
+        //     curr.altitude = prev.altitude;
+        // }
+        //
+        // if (prev && !curr.speed) {
+        //     curr.speed = prev.speed;
+        // }
     }
 
     /**
@@ -158,11 +187,11 @@ export default class AircraftFlightManagementSystem {
             data.firstIndex = this.legs.length;
         }
 
-        const prev = this.currentWaypoint;
         // TODO: split up into smaller chunks
         this.legs.splice(data.firstIndex, 0, new Leg(data, this));
 
         this.update_fp_route();
+        this._copyPreviousWaypointSettingsToCurrent();
 
         // Adjust 'current'
         if (this.current[LEG] >= data.firstIndex) {
@@ -171,14 +200,15 @@ export default class AircraftFlightManagementSystem {
 
         // TODO: these if blocks a repeated elsewhere, perhaps currentWaypoint can handle this logic?
         // Verify altitude & speed not null
-        const curr = this.currentWaypoint;
-        if (prev && !curr.altitude) {
-            curr.altitude = prev.altitude;
-        }
-
-        if (prev && !curr.speed) {
-            curr.speed = prev.speed;
-        }
+        // const prev = this.currentWaypoint;
+        // const curr = this.currentWaypoint;
+        // if (prev && !curr.altitude) {
+        //     curr.altitude = prev.altitude;
+        // }
+        //
+        // if (prev && !curr.speed) {
+        //     curr.speed = prev.speed;
+        // }
     }
 
     /**
@@ -209,6 +239,7 @@ export default class AircraftFlightManagementSystem {
         const airport = window.airportController.airport_get();
         // TODO: split this up into smaller chunks
         this.currentLeg.waypoints.splice(this.current[WAYPOINT_WITHIN_LEG] + 1, 0, new Waypoint(data, airport));
+
         this.update_fp_route();
     }
 
@@ -216,7 +247,6 @@ export default class AircraftFlightManagementSystem {
      *  Switch to the next waypoint
      */
     nextWaypoint() {
-        const prev = this.currentWaypoint;
         const leg = this.current[LEG];
         const wp = this.current[WAYPOINT_WITHIN_LEG] + 1;
 
@@ -231,74 +261,85 @@ export default class AircraftFlightManagementSystem {
 
         // TODO: these if blocks a repeated elsewhere, perhaps currentWaypoint can handle this logic?
         // Replace null values with current values
-        const curr = this.currentWaypoint;
-        if (prev && !curr.altitude) {
-            curr.altitude = prev.altitude;
-        }
+        // const prev = this.currentWaypoint;
+        // const curr = this.currentWaypoint;
+        // if (prev && !curr.altitude) {
+        //     curr.altitude = prev.altitude;
+        // }
+        //
+        // if (prev && !curr.speed) {
+        //     curr.speed = prev.speed;
+        // }
 
-        if (prev && !curr.speed) {
-            curr.speed = prev.speed;
-        }
-
-        if (!curr.heading && curr.navmode === WAYPOINT_NAV_MODE.HEADING) {
-            curr.heading = prev.heading;
-        }
+        // if (!curr.heading && curr.navmode === WAYPOINT_NAV_MODE.HEADING) {
+        //     curr.heading = prev.heading;
+        // }
     }
 
     /**
      *  Switch to the next Leg
      */
     nextLeg() {
-        const prev = this.currentWaypoint;
         this.current[LEG]++;
         this.current[WAYPOINT_WITHIN_LEG] = 0;
 
         // TODO: these if blocks a repeated elsewhere, perhaps currentWaypoint can handle this logic?
         // Replace null values with current values
-        const curr = this.currentWaypoint;
-        if (prev && !curr.altitude) {
-            curr.altitude = prev.altitude;
-        }
-
-        if (prev && !curr.speed) {
-            curr.speed = prev.speed;
-        }
-
-        if (!curr.heading && curr.navmode === WAYPOINT_NAV_MODE.HEADING) {
-            curr.heading = prev.heading;
-        }
+        // const prev = this.currentWaypoint;
+        // const curr = this.currentWaypoint;
+        // if (prev && !curr.altitude) {
+        //     curr.altitude = prev.altitude;
+        // }
+        //
+        // if (prev && !curr.speed) {
+        //     curr.speed = prev.speed;
+        // }
+        //
+        // if (!curr.heading && curr.navmode === WAYPOINT_NAV_MODE.HEADING) {
+        //     curr.heading = prev.heading;
+        // }
     }
 
+    // TODO: does this metod need to return a boolean? heck upstream implementations
     /**
      * Skips to the given waypoint
+     *
+     * @for AircraftFlightManagementSystem
+     * @method skipToFix
      * @param {string} name - the name of the fix to skip to
      */
     skipToFix(name) {
-        const prev = this.currentWaypoint;
+        // const prev = this.currentWaypoint;
+        let canSkipToFix = false;
 
         // TODO: these nested for loops should be simplified
         for (let l = 0; l < this.legs.length; l++) {
             for (let w = 0; w < this.legs[l].waypoints.length; w++) {
+                // What is happening here?
+                // it looks like we are looking for a fix by name and need the indicies of where it exists within
+                // both legs and waypoitns so it can be set to `current`.
                 if (this.legs[l].waypoints[w].fix === name) {
                     this.current = [l, w];
 
+                    this._copyPreviousWaypointSettingsToCurrent();
+
                     // TODO: these if blocks a repeated elsewhere, perhaps currentWaypoint can handle this logic?
                     // Verify altitude & speed not null
-                    const curr = this.currentWaypoint;
-                    if (prev && !curr.altitude) {
-                        curr.altitude = prev.altitude;
-                    }
+                    // const curr = this.currentWaypoint;
+                    // if (prev && !curr.altitude) {
+                    //     curr.altitude = prev.altitude;
+                    // }
+                    //
+                    // if (prev && !curr.speed) {
+                    //     curr.speed = prev.speed;
+                    // }
 
-                    if (prev && !curr.speed) {
-                        curr.speed = prev.speed;
-                    }
-
-                    return true;
+                    canSkipToFix = true;
                 }
             }
         }
 
-        return false;
+        return canSkipToFix;
     }
 
     /**
@@ -855,6 +896,7 @@ export default class AircraftFlightManagementSystem {
         if (Array.isArray(pos)) {
             return this.legs[pos[0]].waypoints[pos[1]];
         } else if (typeof pos === 'number') {
+            // TODO: this else is not needed after a return
             // input is a position of wp in list of all waypoints
             let l = 0;
 
@@ -895,6 +937,11 @@ export default class AircraftFlightManagementSystem {
         return waypointList;
     }
 
+    /**
+     * @for AircraftFlightManagementSystem
+     * @method atLastWaypoint
+     * @return {boolean}
+     */
     atLastWaypoint() {
         // TODO: simplify
         return this.indexOfCurrentWaypoint().wp === this.waypoints().length - 1;
